@@ -1,4 +1,7 @@
+package chess.model.pieces;
 
+import chess.model.Square;
+import view.BoardPanel;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -10,13 +13,13 @@ public class Knight extends Piece {
     }
 
     @Override
-    public List<Square> getLegalMoves(Board b) {
+    public List<Square> getLegalMoves(BoardPanel b) {
         LinkedList<Square> legalMoves = new LinkedList<Square>();
         Square[][] board = b.getSquareArray();
-        
+
         int x = this.getPosition().getXNum();
         int y = this.getPosition().getYNum();
-        
+
         for (int i = 2; i > -3; i--) {
             for (int k = 2; k > -3; k--) {
                 if(Math.abs(i) == 2 ^ Math.abs(k) == 2) {
@@ -30,7 +33,7 @@ public class Knight extends Piece {
                 }
             }
         }
-        
+
         return legalMoves;
     }
 

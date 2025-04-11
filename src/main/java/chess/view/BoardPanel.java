@@ -1,11 +1,9 @@
-package view;
+package main.java.chess.view;
 
-
-
-import chess.model.CheckmateDetector;
-import chess.model.Square;
-import chess.model.pieces.*;
-
+import main.java.chess.model.CheckmateDetector;
+import main.java.chess.model.Square;
+import main.java.chess.model.pieces.Piece;
+import main.java.chess.model.pieces.*;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;

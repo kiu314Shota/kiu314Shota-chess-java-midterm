@@ -1,14 +1,14 @@
-package chess.model.pieces;
+package main.java.chess.model.pieces;
 
-import chess.model.Square;
-import view.BoardPanel;
+import main.java.chess.model.Square;
+import main.java.chess.view.BoardPanel;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class Queen extends Piece {
+public class Rook extends Piece {
 
-    public Queen(int color, Square initSq, String img_file) {
+    public Rook(int color, Square initSq, String img_file) {
         super(color, initSq, img_file);
     }
 
@@ -29,10 +29,6 @@ public class Queen extends Piece {
         for (int i = occups[2]; i <= occups[3]; i++) {
             if (i != x) legalMoves.add(board[y][i]);
         }
-
-        List<Square> bMoves = getDiagonalOccupations(board, x, y);
-
-        legalMoves.addAll(bMoves);
 
         return legalMoves;
     }

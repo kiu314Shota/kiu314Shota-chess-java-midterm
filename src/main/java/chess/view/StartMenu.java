@@ -1,4 +1,4 @@
-package view;
+package main.java.chess.view;
 
 
 import java.awt.BorderLayout;

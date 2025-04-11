@@ -1,9 +1,7 @@
-package chess.model;
+package main.java.chess.model;
 
-
-
-import chess.model.pieces.Piece;
-import view.BoardPanel;
+import main.java.chess.model.pieces.Piece;
+import main.java.chess.view.BoardPanel;
 
 import java.awt.Color;
 import java.awt.Graphics;

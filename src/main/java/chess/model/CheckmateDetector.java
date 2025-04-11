@@ -1,10 +1,8 @@
-package chess.model;
+package main.java.chess.model;
 
-import chess.model.pieces.Bishop;
-import chess.model.pieces.King;
-import chess.model.pieces.Piece;
-import chess.model.pieces.Queen;
-import view.BoardPanel;
+import main.java.chess.model.pieces.*;
+import main.java.chess.model.pieces.Piece;
+import main.java.chess.view.BoardPanel;
 
 import java.util.HashMap;
 import java.util.Iterator;

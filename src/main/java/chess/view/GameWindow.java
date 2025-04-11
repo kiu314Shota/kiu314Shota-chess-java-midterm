@@ -1,7 +1,6 @@
-package view;
+package main.java.chess.view;
 
-import chess.model.Clock;
-import view.StartMenu;
+import main.java.chess.model.Clock;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;

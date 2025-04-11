@@ -1,5 +1,4 @@
-package chess.model;
-
+package main.java.chess.model;
 
 public class Clock {
     private int hh;

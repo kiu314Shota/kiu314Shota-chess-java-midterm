@@ -1,9 +1,8 @@
 package main.java.chess.model.pieces;
 
+import main.java.chess.model.BoardState;
 import main.java.chess.model.Square;
-import main.java.chess.view.BoardPanel;
 
-import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -13,34 +12,30 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 public abstract class Piece {
-    private final int color;
+    private final int color; // 0 = black, 1 = white
     private Square currentSquare;
     private BufferedImage img;
 
-    public Piece(int color, Square initSq, String img_file) {
+    public Piece(int color, Square initSq, String imgFile) {
         this.color = color;
         this.currentSquare = initSq;
-
         try {
-            if (this.img == null) {
-                this.img = ImageIO.read(getClass().getResource(img_file));
-            }
+            img = ImageIO.read(getClass().getResource(imgFile));
         } catch (IOException e) {
-            System.out.println("File not found: " + e.getMessage());
+            System.err.println("Image not found: " + imgFile);
         }
     }
 
     public boolean move(Square fin) {
-        Piece occup = fin.getOccupyingPiece();
-
-        if (occup != null) {
-            if (occup.getColor() == this.color) return false;
-            else fin.capture(this);
+        Piece occupant = fin.getOccupyingPiece();
+        if (occupant != null && occupant.getColor() == this.color) {
+            return false;
         }
-
-        currentSquare.removePiece();
+        if (currentSquare != null) {
+            currentSquare.setOccupyingPiece(null);
+        }
         this.currentSquare = fin;
-        currentSquare.put(this);
+        fin.setOccupyingPiece(this);
         return true;
     }
 
@@ -60,131 +55,114 @@ public abstract class Piece {
         return img;
     }
 
-    public void draw(Graphics g) {
-        int x = currentSquare.getX();
-        int y = currentSquare.getY();
+    /**
+     * Returns a list of legal moves for this piece using the current board state.
+     */
+    public abstract List<Square> getLegalMoves(BoardState boardState);
 
-        g.drawImage(this.img, x, y, null);
-    }
-
-    public int[] getLinearOccupations(Square[][] board, int x, int y) {
-        int lastYabove = 0;
-        int lastXright = 7;
-        int lastYbelow = 7;
-        int lastXleft = 0;
+    protected int[] getLinearOccupations(Square[][] board, int x, int y) {
+        int lastYAbove = 0;
+        int lastYBelow = board.length - 1;
+        int lastXLeft = 0;
+        int lastXRight = board[0].length - 1;
 
         for (int i = 0; i < y; i++) {
-            if (board[i][x].isOccupied()) {
+            if (board[i][x].getOccupyingPiece() != null) {
                 if (board[i][x].getOccupyingPiece().getColor() != this.color) {
-                    lastYabove = i;
-                } else lastYabove = i + 1;
+                    lastYAbove = i;
+                } else {
+                    lastYAbove = i + 1;
+                }
             }
         }
-
-        for (int i = 7; i > y; i--) {
-            if (board[i][x].isOccupied()) {
+        for (int i = board.length - 1; i > y; i--) {
+            if (board[i][x].getOccupyingPiece() != null) {
                 if (board[i][x].getOccupyingPiece().getColor() != this.color) {
-                    lastYbelow = i;
-                } else lastYbelow = i - 1;
+                    lastYBelow = i;
+                } else {
+                    lastYBelow = i - 1;
+                }
             }
         }
-
         for (int i = 0; i < x; i++) {
-            if (board[y][i].isOccupied()) {
+            if (board[y][i].getOccupyingPiece() != null) {
                 if (board[y][i].getOccupyingPiece().getColor() != this.color) {
-                    lastXleft = i;
-                } else lastXleft = i + 1;
+                    lastXLeft = i;
+                } else {
+                    lastXLeft = i + 1;
+                }
             }
         }
-
-        for (int i = 7; i > x; i--) {
-            if (board[y][i].isOccupied()) {
+        for (int i = board[y].length - 1; i > x; i--) {
+            if (board[y][i].getOccupyingPiece() != null) {
                 if (board[y][i].getOccupyingPiece().getColor() != this.color) {
-                    lastXright = i;
-                } else lastXright = i - 1;
+                    lastXRight = i;
+                } else {
+                    lastXRight = i - 1;
+                }
             }
         }
-
-        int[] occups = {lastYabove, lastYbelow, lastXleft, lastXright};
-
-        return occups;
+        return new int[]{lastYAbove, lastYBelow, lastXLeft, lastXRight};
     }
 
-    public List<Square> getDiagonalOccupations(Square[][] board, int x, int y) {
-        LinkedList<Square> diagOccup = new LinkedList<Square>();
-
-        int xNW = x - 1;
-        int xSW = x - 1;
-        int xNE = x + 1;
-        int xSE = x + 1;
-        int yNW = y - 1;
-        int ySW = y + 1;
-        int yNE = y - 1;
-        int ySE = y + 1;
-
+    protected List<Square> getDiagonalOccupations(Square[][] board, int x, int y) {
+        LinkedList<Square> diag = new LinkedList<>();
+        int xNW = x - 1, yNW = y - 1;
         while (xNW >= 0 && yNW >= 0) {
-            if (board[yNW][xNW].isOccupied()) {
-                if (board[yNW][xNW].getOccupyingPiece().getColor() == this.color) {
-                    break;
-                } else {
-                    diagOccup.add(board[yNW][xNW]);
-                    break;
+            Square sq = board[yNW][xNW];
+            if (sq.getOccupyingPiece() != null) {
+                if (sq.getOccupyingPiece().getColor() != this.color) {
+                    diag.add(sq);
                 }
+                break;
             } else {
-                diagOccup.add(board[yNW][xNW]);
-                yNW--;
-                xNW--;
+                diag.add(sq);
             }
+            xNW--;
+            yNW--;
         }
-
-        while (xSW >= 0 && ySW < 8) {
-            if (board[ySW][xSW].isOccupied()) {
-                if (board[ySW][xSW].getOccupyingPiece().getColor() == this.color) {
-                    break;
-                } else {
-                    diagOccup.add(board[ySW][xSW]);
-                    break;
+        int xSW = x - 1, ySW = y + 1;
+        while (xSW >= 0 && ySW < board.length) {
+            Square sq = board[ySW][xSW];
+            if (sq.getOccupyingPiece() != null) {
+                if (sq.getOccupyingPiece().getColor() != this.color) {
+                    diag.add(sq);
                 }
+                break;
             } else {
-                diagOccup.add(board[ySW][xSW]);
-                ySW++;
-                xSW--;
+                diag.add(sq);
             }
+            xSW--;
+            ySW++;
         }
-
-        while (xSE < 8 && ySE < 8) {
-            if (board[ySE][xSE].isOccupied()) {
-                if (board[ySE][xSE].getOccupyingPiece().getColor() == this.color) {
-                    break;
-                } else {
-                    diagOccup.add(board[ySE][xSE]);
-                    break;
+        int xSE = x + 1, ySE = y + 1;
+        while (xSE < board[0].length && ySE < board.length) {
+            Square sq = board[ySE][xSE];
+            if (sq.getOccupyingPiece() != null) {
+                if (sq.getOccupyingPiece().getColor() != this.color) {
+                    diag.add(sq);
                 }
+                break;
             } else {
-                diagOccup.add(board[ySE][xSE]);
-                ySE++;
-                xSE++;
+                diag.add(sq);
             }
+            xSE++;
+            ySE++;
         }
-
-        while (xNE < 8 && yNE >= 0) {
-            if (board[yNE][xNE].isOccupied()) {
-                if (board[yNE][xNE].getOccupyingPiece().getColor() == this.color) {
-                    break;
-                } else {
-                    diagOccup.add(board[yNE][xNE]);
-                    break;
+        int xNE = x + 1, yNE = y - 1;
+        while (xNE < board[0].length && yNE >= 0) {
+            Square sq = board[yNE][xNE];
+            if (sq.getOccupyingPiece() != null) {
+                if (sq.getOccupyingPiece().getColor() != this.color) {
+                    diag.add(sq);
                 }
+                break;
             } else {
-                diagOccup.add(board[yNE][xNE]);
-                yNE--;
-                xNE++;
+                diag.add(sq);
             }
+            xNE++;
+            yNE--;
         }
-
-        return diagOccup;
+        return diag;
     }
-
-    // No implementation, to be implemented by each subclass
-    public abstract List<Square> getLegalMoves(BoardPanel b);
 }

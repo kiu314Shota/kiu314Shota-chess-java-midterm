@@ -1,43 +1,36 @@
 package main.java.chess.model.pieces;
 
+import main.java.chess.model.BoardState;
 import main.java.chess.model.Square;
-import main.java.chess.view.BoardPanel;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class King extends Piece {
-
-    public King(int color, Square initSq, String img_file) {
-        super(color, initSq, img_file);
+    public King(int color, Square initSq, String imgFile) {
+        super(color, initSq, imgFile);
     }
 
     @Override
-    public List<Square> getLegalMoves(BoardPanel b) {
-        LinkedList<Square> legalMoves = new LinkedList<Square>();
-
-        Square[][] board = b.getSquareArray();
-
-        int x = this.getPosition().getXNum();
-        int y = this.getPosition().getYNum();
-
-        for (int i = 1; i > -2; i--) {
-            for (int k = 1; k > -2; k--) {
-                if(!(i == 0 && k == 0)) {
-                    try {
-                        if(!board[y + k][x + i].isOccupied() ||
-                                board[y + k][x + i].getOccupyingPiece().getColor()
-                                        != this.getColor()) {
-                            legalMoves.add(board[y + k][x + i]);
-                        }
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        continue;
+    public List<Square> getLegalMoves(BoardState boardState) {
+        LinkedList<Square> legalMoves = new LinkedList<>();
+        Square[][] board = boardState.getSquareArray();
+        int x = getPosition().getXNum();
+        int y = getPosition().getYNum();
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                if (dx == 0 && dy == 0) continue;
+                int newX = x + dx;
+                int newY = y + dy;
+                if (newX >= 0 && newX < board[0].length &&
+                        newY >= 0 && newY < board.length) {
+                    Square sq = board[newY][newX];
+                    if (!sq.isOccupied() || sq.getOccupyingPiece().getColor() != getColor()) {
+                        legalMoves.add(sq);
                     }
                 }
             }
         }
-
         return legalMoves;
     }
-
 }

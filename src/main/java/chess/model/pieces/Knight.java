@@ -1,40 +1,34 @@
 package main.java.chess.model.pieces;
 
+import main.java.chess.model.BoardState;
 import main.java.chess.model.Square;
-import main.java.chess.view.BoardPanel;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class Knight extends Piece {
-
-    public Knight(int color, Square initSq, String img_file) {
-        super(color, initSq, img_file);
+    public Knight(int color, Square initSq, String imgFile) {
+        super(color, initSq, imgFile);
     }
 
     @Override
-    public List<Square> getLegalMoves(BoardPanel b) {
-        LinkedList<Square> legalMoves = new LinkedList<Square>();
-        Square[][] board = b.getSquareArray();
-
-        int x = this.getPosition().getXNum();
-        int y = this.getPosition().getYNum();
-
-        for (int i = 2; i > -3; i--) {
-            for (int k = 2; k > -3; k--) {
-                if(Math.abs(i) == 2 ^ Math.abs(k) == 2) {
-                    if (k != 0 && i != 0) {
-                        try {
-                            legalMoves.add(board[y + k][x + i]);
-                        } catch (ArrayIndexOutOfBoundsException e) {
-                            continue;
-                        }
-                    }
+    public List<Square> getLegalMoves(BoardState boardState) {
+        LinkedList<Square> legalMoves = new LinkedList<>();
+        Square[][] board = boardState.getSquareArray();
+        int x = getPosition().getXNum();
+        int y = getPosition().getYNum();
+        int[][] moves = {{2,1},{2,-1},{-2,1},{-2,-1},{1,2},{1,-2},{-1,2},{-1,-2}};
+        for (int[] move : moves) {
+            int newX = x + move[0];
+            int newY = y + move[1];
+            if (newX >= 0 && newX < board[0].length &&
+                    newY >= 0 && newY < board.length) {
+                Square sq = board[newY][newX];
+                if (!sq.isOccupied() || sq.getOccupyingPiece().getColor() != getColor()) {
+                    legalMoves.add(sq);
                 }
             }
         }
-
         return legalMoves;
     }
-
 }

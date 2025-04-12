@@ -1,102 +1,56 @@
 package main.java.chess.model;
 
 import main.java.chess.model.pieces.Piece;
-import main.java.chess.view.BoardPanel;
 
-import java.awt.Color;
-import java.awt.Graphics;
-
-import javax.swing.*;
-
-@SuppressWarnings("serial")
-public class Square extends JComponent {
-    private BoardPanel b;
-
-    private final int color;
+/**
+ * Represents a single square on the board (pure data).
+ */
+public class Square {
+    private final int xNum;
+    private final int yNum;
+    private final int color; // 1 = light, 0 = dark
     private Piece occupyingPiece;
-    private boolean dispPiece;
 
-    private int xNum;
-    private int yNum;
-
-    public Square(BoardPanel b, int c, int xNum, int yNum) {
-
-        this.b = b;
-        this.color = c;
-        this.dispPiece = true;
+    public Square(int xNum, int yNum, int color) {
         this.xNum = xNum;
         this.yNum = yNum;
+        this.color = color;
+    }
 
+    public int getXNum() {
+        return xNum;
+    }
 
-        this.setBorder(BorderFactory.createEmptyBorder());
+    public int getYNum() {
+        return yNum;
     }
 
     public int getColor() {
-        return this.color;
+        return color;
     }
 
     public Piece getOccupyingPiece() {
         return occupyingPiece;
     }
 
+    public void setOccupyingPiece(Piece p) {
+        occupyingPiece = p;
+    }
+
     public boolean isOccupied() {
-        return (this.occupyingPiece != null);
-    }
-
-    public int getXNum() {
-        return this.xNum;
-    }
-
-    public int getYNum() {
-        return this.yNum;
-    }
-
-    public void setDisplay(boolean v) {
-        this.dispPiece = v;
-    }
-
-    public void put(Piece p) {
-        this.occupyingPiece = p;
-        p.setPosition(this);
-    }
-
-    public Piece removePiece() {
-        Piece p = this.occupyingPiece;
-        this.occupyingPiece = null;
-        return p;
-    }
-
-    public void capture(Piece p) {
-        Piece k = getOccupyingPiece();
-        if (k.getColor() == 0) b.Bpieces.remove(k);
-        if (k.getColor() == 1) b.Wpieces.remove(k);
-        this.occupyingPiece = p;
-    }
-
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
-        if (this.color == 1) {
-            g.setColor(new Color(221,192,127));
-        } else {
-            g.setColor(new Color(101,67,33));
-        }
-
-        g.fillRect(this.getX(), this.getY(), this.getWidth(), this.getHeight());
-
-        if(occupyingPiece != null && dispPiece) {
-            occupyingPiece.draw(g);
-        }
+        return occupyingPiece != null;
     }
 
     @Override
     public int hashCode() {
-        int prime = 31;
-        int result = 1;
-        result = prime * result + xNum;
-        result = prime * result + yNum;
-        return result;
+        return 31 * (31 + xNum) + yNum;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Square)) return false;
+        Square other = (Square) obj;
+        return this.xNum == other.xNum && this.yNum == other.yNum;
+    }
 }
-

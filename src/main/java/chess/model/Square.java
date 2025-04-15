@@ -49,8 +49,16 @@ public class Square {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof Square)) return false;
-        Square other = (Square) obj;
+        if (!(obj instanceof Square other)) return false;
         return this.xNum == other.xNum && this.yNum == other.yNum;
+    }
+
+    public void put(Piece p) {
+        this.occupyingPiece = p;
+        p.setPosition(this);
+    }
+
+    public void removePiece() {
+        this.occupyingPiece = null;
     }
 }

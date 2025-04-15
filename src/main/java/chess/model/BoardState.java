@@ -1,7 +1,6 @@
 package main.java.chess.model;
 
 import main.java.chess.model.pieces.*;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class BoardState {
     }
 
     private void initializePieces() {
-        // Pawns
+        // Initializing Pawns
         for (int x = 0; x < SIZE; x++) {
             Pawn blackPawn = new Pawn(0, board[1][x], "/main/resources/images/bpawn.png");
             board[1][x].setOccupyingPiece(blackPawn);

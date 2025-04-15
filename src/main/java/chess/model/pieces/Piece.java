@@ -6,23 +6,29 @@ import main.java.chess.model.Square;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.imageio.ImageIO;
 
 public abstract class Piece {
-    private final int color; // 0 = black, 1 = white
+    private final int color;
     private Square currentSquare;
     private BufferedImage img;
 
     public Piece(int color, Square initSq, String imgFile) {
         this.color = color;
         this.currentSquare = initSq;
+        URL imgUrl = getClass().getResource(imgFile);
+        if (imgUrl == null) {
+            System.err.println("Image resource not found: " + imgFile);
+        }
         try {
-            img = ImageIO.read(getClass().getResource(imgFile));
+            img = ImageIO.read(Objects.requireNonNull(imgUrl, "Image resource is null: " + imgFile));
         } catch (IOException e) {
-            System.err.println("Image not found: " + imgFile);
+            System.err.println("Failed to load image: " + imgFile + " : " + e.getMessage());
         }
     }
 

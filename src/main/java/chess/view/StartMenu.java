@@ -1,104 +1,137 @@
 package main.java.chess.view;
 
-import java.awt.Image;
-import java.awt.event.ActionEvent;
-
 import javax.imageio.ImageIO;
-import javax.swing.Box;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
 public class StartMenu implements Runnable {
     @Override
     public void run() {
         JFrame startWindow = new JFrame("Chess Start Menu");
         startWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        startWindow.setSize(260, 240);
-        startWindow.setLocation(300, 100);
+        startWindow.setSize(300, 350);
+        startWindow.setLocationRelativeTo(null);
         startWindow.setResizable(false);
 
-        Box components = Box.createVerticalBox();
-        startWindow.add(components);
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-        JPanel titlePanel = new JPanel();
-        components.add(titlePanel);
-        JLabel titleLabel = new JLabel("Chess");
-        titlePanel.add(titleLabel);
+        JLabel title = new JLabel("Chess Game", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 24));
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(title);
+        mainPanel.add(Box.createVerticalStrut(15));
 
-        JPanel blackPanel = new JPanel();
-        components.add(blackPanel);
-        JLabel blackIcon = new JLabel();
-        try {
-            Image blackImg = ImageIO.read(getClass().getResource("/main/resources/images/bp.png"));
-            blackIcon.setIcon(new ImageIcon(blackImg));
-        } catch (Exception e) {
-            System.err.println("bp.png not found");
-        }
-        blackPanel.add(blackIcon);
-        JTextField blackInput = new JTextField("Black", 10);
-        blackPanel.add(blackInput);
+        // Player names section
+        JPanel namesPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        namesPanel.setMaximumSize(new Dimension(280, 60));
+        namesPanel.add(new JLabel("Black:", SwingConstants.RIGHT));
+        JTextField blackNameField = new JTextField("Black");
+        namesPanel.add(blackNameField);
+        namesPanel.add(new JLabel("White:", SwingConstants.RIGHT));
+        JTextField whiteNameField = new JTextField("White");
+        namesPanel.add(whiteNameField);
+        mainPanel.add(namesPanel);
+        mainPanel.add(Box.createVerticalStrut(15));
 
-        JPanel whitePanel = new JPanel();
-        components.add(whitePanel);
-        JLabel whiteIcon = new JLabel();
-        try {
-            Image whiteImg = ImageIO.read(getClass().getResource("/main/resources/images/wp.png"));
-            whiteIcon.setIcon(new ImageIcon(whiteImg));
-            startWindow.setIconImage(whiteImg);
-        } catch (Exception e) {
-            System.err.println("wp.png not found");
-        }
-        whitePanel.add(whiteIcon);
-        JTextField whiteInput = new JTextField("White", 10);
-        whitePanel.add(whiteInput);
+        // Timer section with plus and minus buttons
+        JPanel timerPanel = new JPanel();
+        timerPanel.setLayout(new GridLayout(3, 3, 5, 5));
 
-        // Timer settings
-        String[] minSecInts = new String[60];
-        for (int i = 0; i < 60; i++) {
-            minSecInts[i] = String.format("%02d", i);
-        }
-        JComboBox<String> hours = new JComboBox<>(new String[]{"0", "1", "2", "3"});
-        JComboBox<String> minutes = new JComboBox<>(minSecInts);
-        JComboBox<String> seconds = new JComboBox<>(minSecInts);
-        Box timerBox = Box.createHorizontalBox();
-        timerBox.add(hours);
-        timerBox.add(Box.createHorizontalStrut(10));
-        timerBox.add(minutes);
-        timerBox.add(Box.createHorizontalStrut(10));
-        timerBox.add(seconds);
-        components.add(timerBox);
+        // Timer labels
+        JLabel hourLabel = new JLabel("Hours:");
+        JLabel minuteLabel = new JLabel("Minutes:");
+        JLabel secondLabel = new JLabel("Seconds:");
 
-        // Buttons
-        Box buttonBox = Box.createHorizontalBox();
-        JButton start = new JButton("Start");
-        start.addActionListener((ActionEvent e) -> {
-            String bn = blackInput.getText();
-            String wn = whiteInput.getText();
-            int hh = Integer.parseInt((String) hours.getSelectedItem());
-            int mm = Integer.parseInt((String) minutes.getSelectedItem());
-            int ss = Integer.parseInt((String) seconds.getSelectedItem());
+        // Default values: 0 hours, 2 minutes, 0 seconds.
+        JTextField hourField = new JTextField("0", 3);
+        JTextField minuteField = new JTextField("2", 3);
+        JTextField secondField = new JTextField("0", 3);
+
+        JButton hourInc = new JButton("+");
+        JButton hourDec = new JButton("-");
+        JButton minuteInc = new JButton("+");
+        JButton minuteDec = new JButton("-");
+        JButton secondInc = new JButton("+");
+        JButton secondDec = new JButton("-");
+
+        // Add action listeners for timer adjustments
+        hourInc.addActionListener(e -> {
+            int val = Integer.parseInt(hourField.getText());
+            hourField.setText(String.valueOf(val + 1));
+        });
+        hourDec.addActionListener(e -> {
+            int val = Integer.parseInt(hourField.getText());
+            if (val > 0) hourField.setText(String.valueOf(val - 1));
+        });
+        minuteInc.addActionListener(e -> {
+            int val = Integer.parseInt(minuteField.getText());
+            minuteField.setText(String.valueOf(val + 1));
+        });
+        minuteDec.addActionListener(e -> {
+            int val = Integer.parseInt(minuteField.getText());
+            if (val > 0) minuteField.setText(String.valueOf(val - 1));
+        });
+        secondInc.addActionListener(e -> {
+            int val = Integer.parseInt(secondField.getText());
+            secondField.setText(String.valueOf(val + 1));
+        });
+        secondDec.addActionListener(e -> {
+            int val = Integer.parseInt(secondField.getText());
+            if (val > 0) secondField.setText(String.valueOf(val - 1));
+        });
+
+        timerPanel.add(hourLabel);
+        timerPanel.add(hourField);
+        JPanel hourBtnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        hourBtnPanel.add(hourDec);
+        hourBtnPanel.add(hourInc);
+        timerPanel.add(hourBtnPanel);
+
+        timerPanel.add(minuteLabel);
+        timerPanel.add(minuteField);
+        JPanel minuteBtnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        minuteBtnPanel.add(minuteDec);
+        minuteBtnPanel.add(minuteInc);
+        timerPanel.add(minuteBtnPanel);
+
+        timerPanel.add(secondLabel);
+        timerPanel.add(secondField);
+        JPanel secondBtnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        secondBtnPanel.add(secondDec);
+        secondBtnPanel.add(secondInc);
+        timerPanel.add(secondBtnPanel);
+
+        mainPanel.add(timerPanel);
+        mainPanel.add(Box.createVerticalStrut(15));
+
+        // Control buttons: Start, Instructions, Quit.
+        JPanel buttonPanel = new JPanel();
+        JButton startButton = new JButton("Start");
+        JButton instructButton = new JButton("Instructions");
+        JButton quitButton = new JButton("Quit");
+        buttonPanel.add(startButton);
+        buttonPanel.add(instructButton);
+        buttonPanel.add(quitButton);
+        mainPanel.add(buttonPanel);
+
+        // Action listeners
+        startButton.addActionListener(e -> {
+            String bn = blackNameField.getText();
+            String wn = whiteNameField.getText();
+            int hh = Integer.parseInt(hourField.getText());
+            int mm = Integer.parseInt(minuteField.getText());
+            int ss = Integer.parseInt(secondField.getText());
             new GameWindow(bn, wn, hh, mm, ss);
             startWindow.dispose();
         });
-        JButton instruct = new JButton("Instructions");
-        instruct.addActionListener(e -> JOptionPane.showMessageDialog(startWindow,
-                "Enter player names, set a timer (or 0 for untimed), then click Start.",
-                "Instructions", JOptionPane.PLAIN_MESSAGE));
-        JButton quit = new JButton("Quit");
-        quit.addActionListener(e -> startWindow.dispose());
-        buttonBox.add(start);
-        buttonBox.add(Box.createHorizontalStrut(10));
-        buttonBox.add(instruct);
-        buttonBox.add(Box.createHorizontalStrut(10));
-        buttonBox.add(quit);
-        components.add(buttonBox);
+        instructButton.addActionListener(e -> JOptionPane.showMessageDialog(startWindow,
+                "Enter player names and adjust the timer using the +/- buttons.\nDefault is 0:2:0 (2 minutes).\nThen click 'Start' to begin.",
+                "Instructions", JOptionPane.INFORMATION_MESSAGE));
+        quitButton.addActionListener(e -> startWindow.dispose());
 
+        startWindow.add(mainPanel);
         startWindow.setVisible(true);
     }
 }

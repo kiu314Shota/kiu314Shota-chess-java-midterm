@@ -1,105 +1,98 @@
 package main.java.chess.view;
 
 import main.java.chess.model.Clock;
-
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.*;
+import java.net.URL;
 
-public class GameWindow {
-    private JFrame gameWindow;
-    public Clock blackClock, whiteClock;
+public class GameWindow implements TimerStarter {
+    private final Clock blackClock, whiteClock;
+    private final JLabel blackTimeLabel, whiteTimeLabel;
+    private final BoardPanel boardPanel;
     private Timer timer;
-    private BoardPanel boardPanel;
+    private boolean timerStarted = false;
 
     public GameWindow(String blackName, String whiteName, int hh, int mm, int ss) {
         blackClock = new Clock(hh, mm, ss);
         whiteClock = new Clock(hh, mm, ss);
 
-        gameWindow = new JFrame("Chess");
-        try {
-            Image icon = ImageIO.read(getClass().getResource("/main/resources/images/wp.png"));
-            gameWindow.setIconImage(icon);
-        } catch (Exception e) {
-            System.err.println("wp.png not found");
+        JFrame frame = new JFrame("Chess");
+        frame.setLayout(new BorderLayout(10,10));
+
+        // Load icon
+        URL iconUrl = getClass().getClassLoader().getResource("images/wp.png");
+        if (iconUrl != null) {
+            try { frame.setIconImage(ImageIO.read(iconUrl)); }
+            catch (Exception e) { e.printStackTrace(); }
         }
-        gameWindow.setLocation(100, 100);
-        gameWindow.setLayout(new BorderLayout(20,20));
 
-        JPanel dataPanel = createDataPanel(blackName, whiteName, hh, mm, ss);
-        gameWindow.add(dataPanel, BorderLayout.NORTH);
+        // Top = Black info
+        JPanel top = new JPanel(new BorderLayout());
+        JLabel bName = new JLabel(blackName, SwingConstants.CENTER);
+        bName.setForeground(Color.RED);
+        blackTimeLabel = new JLabel(blackClock.getTime(), SwingConstants.CENTER);
+        top.add(bName, BorderLayout.NORTH);
+        top.add(blackTimeLabel, BorderLayout.SOUTH);
 
-        boardPanel = new BoardPanel();
-        gameWindow.add(boardPanel, BorderLayout.CENTER);
+        // Bottom = White info
+        JPanel bot = new JPanel(new BorderLayout());
+        JLabel wName = new JLabel(whiteName, SwingConstants.CENTER);
+        wName.setForeground(Color.BLUE);
+        whiteTimeLabel = new JLabel(whiteClock.getTime(), SwingConstants.CENTER);
+        bot.add(wName, BorderLayout.NORTH);
+        bot.add(whiteTimeLabel, BorderLayout.SOUTH);
 
-        JPanel btnPanel = createButtonPanel();
-        gameWindow.add(btnPanel, BorderLayout.SOUTH);
+        // Center = BoardPanel, pass this as TimerStarter
+        boardPanel = new BoardPanel(this);
 
-        gameWindow.pack();
-        gameWindow.setResizable(false);
-        gameWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        gameWindow.setVisible(true);
-
-        if (hh != 0 || mm != 0 || ss != 0) {
-            startTimer();
-        }
-    }
-
-    private JPanel createDataPanel(String bn, String wn, int hh, int mm, int ss) {
-        JPanel panel = new JPanel(new GridLayout(2,2));
-        JLabel whiteLabel = new JLabel(wn, SwingConstants.CENTER);
-        JLabel blackLabel = new JLabel(bn, SwingConstants.CENTER);
-        JLabel whiteTime = new JLabel(whiteClock.getTime(), SwingConstants.CENTER);
-        JLabel blackTime = new JLabel(blackClock.getTime(), SwingConstants.CENTER);
-        panel.add(whiteLabel);
-        panel.add(blackLabel);
-        panel.add(whiteTime);
-        panel.add(blackTime);
-        return panel;
-    }
-
-    private JPanel createButtonPanel() {
-        JPanel panel = new JPanel(new GridLayout(1,3,10,0));
-        JButton instruct = new JButton("Instructions");
-        instruct.addActionListener(e ->
-                JOptionPane.showMessageDialog(gameWindow,
-                        "Drag pieces to move them.\nWin by checkmate or on time.",
-                        "Instructions", JOptionPane.PLAIN_MESSAGE));
-        JButton newGame = new JButton("New Game");
-        newGame.addActionListener(e -> {
+        // East = Buttons
+        JPanel buttons = new JPanel(new GridLayout(3,1,5,5));
+        JButton instr = new JButton("Instructions");
+        instr.addActionListener(e ->
+                JOptionPane.showMessageDialog(frame,
+                        "Drag pieces to move them.\nTimer starts on your first valid move.",
+                        "Instructions", JOptionPane.PLAIN_MESSAGE)
+        );
+        JButton newG = new JButton("New Game");
+        newG.addActionListener(e -> {
             SwingUtilities.invokeLater(new StartMenu());
-            gameWindow.dispose();
+            frame.dispose();
         });
         JButton quit = new JButton("Quit");
-        quit.addActionListener(e -> {
-            if (timer != null) timer.stop();
-            gameWindow.dispose();
-        });
-        panel.add(instruct);
-        panel.add(newGame);
-        panel.add(quit);
-        return panel;
+        quit.addActionListener(e -> { if (timer!=null) timer.stop(); frame.dispose(); });
+
+        buttons.add(instr);
+        buttons.add(newG);
+        buttons.add(quit);
+
+        // Assemble
+        frame.add(top,    BorderLayout.NORTH);
+        frame.add(bot,    BorderLayout.SOUTH);
+        frame.add(boardPanel, BorderLayout.CENTER);
+        frame.add(buttons,    BorderLayout.EAST);
+
+        frame.pack();
+        frame.setResizable(false);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setVisible(true);
     }
 
-    private void startTimer() {
-        timer = new Timer(1000, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (boardPanel.getTurn()) {
-                    whiteClock.decr();
-                } else {
-                    blackClock.decr();
-                }
+    @Override
+    public void startTimerIfNotStarted() {
+        if (!timerStarted) {
+            timerStarted = true;
+            timer = new Timer(1000, e -> {
+                if (boardPanel.isWhiteTurn()) whiteClock.decr();
+                else                            blackClock.decr();
+                whiteTimeLabel.setText(whiteClock.getTime());
+                blackTimeLabel.setText(blackClock.getTime());
                 if (whiteClock.outOfTime() || blackClock.outOfTime()) {
                     timer.stop();
-                    JOptionPane.showMessageDialog(gameWindow, "Time's up!");
-                    gameWindow.dispose();
+                    JOptionPane.showMessageDialog(null, "Time's up!");
                 }
-            }
-        });
-        timer.start();
+            });
+            timer.start();
+        }
     }
 }

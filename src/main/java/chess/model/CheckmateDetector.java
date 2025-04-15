@@ -102,8 +102,7 @@ public class CheckmateDetector {
 
     public boolean blackCheckMated() {
         if (!blackInCheck()) return false;
-        boolean checkmate = true;
-        if (canEvade(whiteMoves, blackKing)) checkmate = false;
+        boolean checkmate = !canEvade(whiteMoves, blackKing);
         List<Piece> threats = whiteMoves.get(blackKing.getPosition());
         if (canCapture(blackMoves, threats, blackKing)) checkmate = false;
         if (canBlock(threats, blackMoves, blackKing)) checkmate = false;
@@ -112,8 +111,7 @@ public class CheckmateDetector {
 
     public boolean whiteCheckMated() {
         if (!whiteInCheck()) return false;
-        boolean checkmate = true;
-        if (canEvade(blackMoves, whiteKing)) checkmate = false;
+        boolean checkmate = !canEvade(blackMoves, whiteKing);
         List<Piece> threats = blackMoves.get(whiteKing.getPosition());
         if (canCapture(whiteMoves, threats, whiteKing)) checkmate = false;
         if (canBlock(threats, whiteMoves, whiteKing)) checkmate = false;

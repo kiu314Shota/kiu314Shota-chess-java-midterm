@@ -9,109 +9,162 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
 
-public class BoardPanel extends JPanel implements MouseListener, MouseMotionListener {
-    private final BoardState boardState;
-    private final SquarePanel[][] squarePanels;
-    private boolean whiteTurn;
-    private Piece currPiece;
-    private int currX;
-    private int currY;
+public class BoardPanel extends JPanel
+        implements MouseListener, MouseMotionListener {
+    private static final int TILE = 64;
 
-    public BoardPanel() {
-        this.boardState = new BoardState();
-        this.squarePanels = new SquarePanel[BoardState.SIZE][BoardState.SIZE];
-        this.whiteTurn = boardState.isWhiteTurn();
+    private final BoardState model;
+    private final TimerStarter timerStarter;
 
-        setLayout(new GridLayout(BoardState.SIZE, BoardState.SIZE, 0, 0));
+    // Drag state
+    private Piece draggingPiece;
+    private Square sourceSquare;
+    private SquarePanel sourcePanel;
+    private boolean dragging;
+    private boolean ghostActive;
+    private int dragX, dragY;
+
+    public BoardPanel(TimerStarter starter) {
+        this.model = new BoardState();
+        this.timerStarter = starter;
+
+        int N = BoardState.SIZE;
+        setLayout(new GridLayout(N, N));
+        setPreferredSize(new Dimension(N * TILE, N * TILE));
+
+        // Build UI from model
+        Square[][] board = model.getSquareArray();
+        for (int r = 0; r < N; r++) {
+            for (int c = 0; c < N; c++) {
+                add(new SquarePanel(board[r][c]));
+            }
+        }
+
         addMouseListener(this);
         addMouseMotionListener(this);
-
-        // Create and add SquarePanels
-        Square[][] squares = boardState.getSquareArray();
-        for (int y = 0; y < BoardState.SIZE; y++) {
-            for (int x = 0; x < BoardState.SIZE; x++) {
-                SquarePanel sqPanel = new SquarePanel(squares[y][x]);
-                squarePanels[y][x] = sqPanel;
-                add(sqPanel);
-            }
-        }
-        setPreferredSize(new Dimension(400, 400));
     }
 
-    public Square[][] getSquareArray() {
-        return boardState.getSquareArray();
-    }
-
-    public boolean getTurn() {
-        return whiteTurn;
-    }
-
+    // Paint children first, then ghost on top
     @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        // We let each SquarePanel paint itself.
-        // If dragging a piece, optionally show its image at (currX, currY).
-        if (currPiece != null) {
-            Image img = currPiece.getImage();
-            if (img != null) {
-                g.drawImage(img, currX, currY, 64, 64, null);
-            }
+    public void paint(Graphics g) {
+        super.paint(g);
+        if (ghostActive && draggingPiece != null) {
+            g.drawImage(draggingPiece.getImage(),
+                    dragX - TILE/2,
+                    dragY - TILE/2,
+                    TILE, TILE,
+                    null);
         }
+    }
+
+    private SquarePanel panelAt(int x, int y) {
+        Component comp = getComponentAt(x, y);
+        return (comp instanceof SquarePanel) ? (SquarePanel) comp : null;
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        currX = e.getX();
-        currY = e.getY();
-        Component comp = getComponentAt(new Point(currX, currY));
-        if (comp instanceof SquarePanel) {
-            SquarePanel sqPanel = (SquarePanel) comp;
-            if (sqPanel.getOccupyingPiece() != null) {
-                currPiece = sqPanel.getOccupyingPiece();
-                // Optionally check if the piece color matches the turn, etc.
-                sqPanel.setDisplayPiece(false);
-            }
+        SquarePanel sp = panelAt(e.getX(), e.getY());
+        if (sp == null) return;
+        Piece p = sp.getOccupyingPiece();
+        if (p == null) return;
+        // only pick up if it's your color
+        if ((model.isWhiteTurn() && p.getColor() == 1) ||
+                (!model.isWhiteTurn() && p.getColor() == 0)) {
+            draggingPiece = p;
+            sourceSquare  = sp.getSquareData();
+            sourcePanel   = sp;
+            ghostActive   = true;
+            dragging      = true;
+            dragX         = e.getX();
+            dragY         = e.getY();
+            // hide original piece in its panel
+            sourcePanel.setDisplayPiece(false);
+            repaint();
         }
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        if (!dragging) return;
+        dragX = e.getX();
+        dragY = e.getY();
         repaint();
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        int x = e.getX();
-        int y = e.getY();
-        Component comp = getComponentAt(new Point(x, y));
+        if (!dragging) return;
+        SquarePanel tp = panelAt(e.getX(), e.getY());
+        boolean moved = false;
 
-        if (comp instanceof SquarePanel && currPiece != null) {
-            SquarePanel targetSqPanel = (SquarePanel) comp;
-            // Retrieve possible legal moves
-            List<Square> legalMoves = currPiece.getLegalMoves(boardState);
-            Square targetSquare = targetSqPanel.getSquareData();
-            if (legalMoves.contains(targetSquare)) {
-                // Move piece in the model
-                currPiece.move(targetSquare);
-                // Toggle turn in model
-                boardState.toggleTurn();
-                whiteTurn = boardState.isWhiteTurn();
+        if (tp != null) {
+            Square targetSq = tp.getSquareData();
+
+            // 1) Cancel if released back on source
+            if (targetSq.equals(sourceSquare)) {
+                sourcePanel.setDisplayPiece(true);
+                moved = true; // handled
+            } else {
+                // 2) Check legal moves
+                List<Square> legal = draggingPiece.getLegalMoves(model);
+                if (legal.contains(targetSq)) {
+                    // commit the move
+                    sourceSquare.removePiece();
+                    targetSq.put(draggingPiece);
+                    tp.setDisplayPiece(true);
+                    model.toggleTurn();
+                    timerStarter.startTimerIfNotStarted();
+                    moved = true;
+                }
             }
         }
-        // Return the piece to normal display
-        if (currPiece != null) {
-            // The original SquarePanel that had the piece should display it again
-            // But in the simple approach, we re-render everything
+
+        if (!moved) {
+            // illegal: snap back and shake
+            sourceSquare.put(draggingPiece);
+            sourcePanel.setDisplayPiece(true);
+            shakeWindow();
         }
-        currPiece = null;
+
+        // reset drag state
+        draggingPiece = null;
+        sourceSquare  = null;
+        sourcePanel   = null;
+        dragging      = false;
+        ghostActive   = false;
         repaint();
     }
 
-    @Override
-    public void mouseDragged(MouseEvent e) {
-        currX = e.getX() - 24;
-        currY = e.getY() - 24;
-        repaint();
+    private void shakeWindow() {
+        Window w = SwingUtilities.getWindowAncestor(this);
+        Point orig = w.getLocation();
+        int dist = 10, times = 6;
+        Timer shake = new Timer(50, null);
+        shake.addActionListener(new ActionListener() {
+            int count = 0;
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int offset = (count % 2 == 0) ? dist : -dist;
+                w.setLocation(orig.x + offset, orig.y);
+                count++;
+                if (count >= times) {
+                    shake.stop();
+                    w.setLocation(orig);
+                }
+            }
+        });
+        shake.start();
     }
 
-    @Override public void mouseMoved(MouseEvent e) {}
-    @Override public void mouseClicked(MouseEvent e) {}
-    @Override public void mouseEntered(MouseEvent e) {}
-    @Override public void mouseExited(MouseEvent e) {}
+    /** Expose whose turn it is for the timer. */
+    public boolean isWhiteTurn() {
+        return model.isWhiteTurn();
+    }
+
+    // unused stubs
+    @Override public void mouseClicked(MouseEvent e) { }
+    @Override public void mouseEntered(MouseEvent e) { }
+    @Override public void mouseExited(MouseEvent e)  { }
+    @Override public void mouseMoved(MouseEvent e)   { }
 }

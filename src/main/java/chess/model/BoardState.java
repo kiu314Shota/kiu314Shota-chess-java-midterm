@@ -6,16 +6,13 @@ import java.util.List;
 
 public class BoardState {
     public static final int SIZE = 8;
-    private Square[][] board;
-    private List<Piece> whitePieces;
-    private List<Piece> blackPieces;
-    private boolean whiteTurn;
+    private final Square[][] board = new Square[SIZE][SIZE];
+    private boolean whiteTurn = true;
+    private final List<Piece> whitePieces = new LinkedList<>();
+    private final List<Piece> blackPieces = new LinkedList<>();
+    private King whiteKing, blackKing;
 
     public BoardState() {
-        board = new Square[SIZE][SIZE];
-        whitePieces = new LinkedList<>();
-        blackPieces = new LinkedList<>();
-        whiteTurn = true;
         initializeSquares();
         initializePieces();
     }
@@ -57,7 +54,7 @@ public class BoardState {
         board[0][3].setOccupyingPiece(blackQueen);
         blackPieces.add(blackQueen);
 
-        King blackKing = new King(0, board[0][4], "/main/resources/images/bking.png");
+        blackKing = new King(0, board[0][4], "/main/resources/images/bking.png");
         board[0][4].setOccupyingPiece(blackKing);
         blackPieces.add(blackKing);
 
@@ -90,7 +87,7 @@ public class BoardState {
         board[7][3].setOccupyingPiece(whiteQueen);
         whitePieces.add(whiteQueen);
 
-        King whiteKing = new King(1, board[7][4], "/main/resources/images/wking.png");
+        whiteKing = new King(1, board[7][4], "/main/resources/images/wking.png");
         board[7][4].setOccupyingPiece(whiteKing);
         whitePieces.add(whiteKing);
 
@@ -111,10 +108,11 @@ public class BoardState {
         return board;
     }
 
+    @SuppressWarnings("unused")
     public List<Piece> getWhitePieces() {
         return whitePieces;
     }
-
+    @SuppressWarnings("unused")
     public List<Piece> getBlackPieces() {
         return blackPieces;
     }
@@ -125,5 +123,61 @@ public class BoardState {
 
     public void toggleTurn() {
         whiteTurn = !whiteTurn;
+    }
+
+    @SuppressWarnings("unused")
+    public King getWhiteKing() {
+        return whiteKing;
+    }
+
+    @SuppressWarnings("unused")
+    public King getBlackKing() {
+        return blackKing;
+    }
+
+    public boolean isKingSafeAfterMove(Piece p, Square target) {
+        Square origin = p.getPosition();
+        Piece captured = target.getOccupyingPiece();
+
+        // 1) Perform move
+        origin.removePiece();
+        target.put(p);
+
+        // 2) Check king safety
+        CheckmateDetector det = new CheckmateDetector(
+                this,
+                new LinkedList<>(whitePieces),
+                new LinkedList<>(blackPieces),
+                whiteKing, blackKing
+        );
+        boolean safe = (p.getColor() == 1)
+                ? !det.whiteInCheck()
+                : !det.blackInCheck();
+
+        // 3) Revert move
+        target.removePiece();
+        origin.put(p);
+        if (captured != null) {
+            target.put(captured);
+        }
+
+        return safe;
+    }
+
+    public boolean isWhiteCheckmated() {
+        CheckmateDetector d = new CheckmateDetector(this,
+                new LinkedList<>(whitePieces),
+                new LinkedList<>(blackPieces),
+                whiteKing,
+                blackKing);
+        return d.blackCheckMated();
+    }
+
+    public boolean isBlackCheckmated() {
+        CheckmateDetector d = new CheckmateDetector(this,
+                new LinkedList<>(whitePieces),
+                new LinkedList<>(blackPieces),
+                whiteKing, blackKing);
+        return d.blackCheckMated();
     }
 }

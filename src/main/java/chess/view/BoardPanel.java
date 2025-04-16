@@ -108,13 +108,22 @@ public class BoardPanel extends JPanel
             } else {
                 // 2) Check legal moves
                 List<Square> legal = draggingPiece.getLegalMoves(model);
-                if (legal.contains(targetSq)) {
-                    // commit the move
+                if (legal.contains(targetSq) && model.isKingSafeAfterMove(draggingPiece, targetSq)) {
                     sourceSquare.removePiece();
                     targetSq.put(draggingPiece);
                     tp.setDisplayPiece(true);
                     model.toggleTurn();
                     timerStarter.startTimerIfNotStarted();
+
+                    if ( model.isBlackCheckmated() ) {
+                        timerStarter.gameOver(1);  // white just delivered checkmate
+                        return;
+                    }
+                    if ( model.isWhiteCheckmated() ) {
+                        timerStarter.gameOver(0);  // black just delivered checkmate
+                        return;
+                    }
+
                     moved = true;
                 }
             }

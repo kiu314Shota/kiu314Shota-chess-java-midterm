@@ -1,6 +1,6 @@
-package main.java.chess.app;
+package chess.app;
 
-import main.java.chess.view.StartMenu;
+import chess.view.StartMenu;
 
 import javax.swing.*;
 

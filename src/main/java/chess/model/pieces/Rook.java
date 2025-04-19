@@ -1,7 +1,7 @@
-package main.java.chess.model.pieces;
+package chess.model.pieces;
 
-import main.java.chess.model.BoardState;
-import main.java.chess.model.Square;
+import chess.model.BoardState;
+import chess.model.Square;
 
 import java.util.LinkedList;
 import java.util.List;

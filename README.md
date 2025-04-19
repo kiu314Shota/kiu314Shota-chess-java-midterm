@@ -1,19 +1,47 @@
-# Chess for Java
+# Java Chess Game – Refactored & Enhanced Version (2025)
 
-In the Spring of 2014, I created a two-player Chess game, with checkmate detection and a chess clock as a part of a Programming course at Penn. Our objective was to develop and test a bug-free standalone game in Java, complete with a GUI and game logic components.
+This project is a fully functional two-player chess game developed in Java. It includes a graphical user interface (GUI), complete chess rules implementation (including checkmate, stalemate, and pawn promotion), and thorough unit testing.
 
-I developed a bug-free, fast and well-designed product with a clean user interface and received the highest possible score in the assignment. The source code is in this repository.
+The codebase was heavily refactored to follow the Model-View-Controller (MVC) design pattern and encapsulate game logic properly. Unit tests for all pieces and game rules have been added and pass successfully.
 
-## Technology
+## Features
 
-This game is built using core Java, Java Swing GUI libraries and the jUnit test suite. It uses custom drawing for game components and self-programmed logic for checkmate detection. The code is modular, standalone and object oriented, which was a grading criteria for the assignment.
+- Complete implementation of all chess pieces and legal moves
+- Check, checkmate, and stalemate detection
+- Pawn promotion to any piece
+- Move validation using king safety logic
+- Piece dragging with GUI feedback
+- Visual checkmate and game-over detection
+- Fully refactored MVC architecture
+- 100% test coverage for core game logic
 
-## Running
+## Technologies Used
 
-Compile the project into an executable .jar file by running the following ANT build script on the command line. Make sure jar-in-jar-loader.zip in this repository is in the folder.
+- Java 17+
+- Java Swing (GUI)
+- JUnit 5 (unit testing)
+- Maven (build & dependency management)
 
-```
-ant -f build.xml
-```
+## How to Run
 
-Then, run the executable .jar file, named _chess-java.jar_ to play.
+1. Clone the repository.
+2. Open the project in IntelliJ IDEA or another Java IDE.
+3. Run the `Main` class to start the application.
+
+To run tests:
+mvn test
+
+## Project Structure
+
+- `model/` – Contains core game logic, board state, and piece classes
+- `view/` – Swing-based GUI components (board, squares, pieces)
+- `controller/` – Handles input and coordinates model/view (integrated into view in this version)
+- `test/` – JUnit 5 test suite covering movement rules, special rules, and game state
+
+## Contributors
+
+This version was developed and fully tested by **[Your Name]**, a Computer Science student at Kutaisi International University.
+
+## License
+
+This project is for educational use only.

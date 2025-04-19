@@ -1,6 +1,6 @@
-package main.java.chess.view;
+package chess.view;
 
-import main.java.chess.model.Clock;
+import chess.model.Clock;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

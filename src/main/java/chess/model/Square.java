@@ -1,6 +1,6 @@
-package main.java.chess.model;
+package chess.model;
 
-import main.java.chess.model.pieces.Piece;
+import chess.model.pieces.Piece;
 
 public class Square {
     private final int xNum;

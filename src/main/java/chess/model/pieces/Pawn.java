@@ -1,8 +1,8 @@
-package main.java.chess.model.pieces;
+package chess.model.pieces;
 
 
-import main.java.chess.model.BoardState;
-import main.java.chess.model.Square;
+import chess.model.BoardState;
+import chess.model.Square;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +18,9 @@ public class Pawn extends Piece {
     @Override
     public boolean move(Square fin) {
         boolean moved = super.move(fin);
-        if(moved) wasMoved = true;
+        if (moved && !wasMoved) {
+            wasMoved = true;
+        }
         return moved;
     }
 
@@ -31,40 +33,49 @@ public class Pawn extends Piece {
         int c = getColor();
 
         if (c == 0) {
-            if (y + 1 < board.length && !board[y+1][x].isOccupied()) {
-                legalMoves.add(board[y+1][x]);
-                if (!wasMoved && y + 2 < board.length && !board[y+2][x].isOccupied()) {
-                    legalMoves.add(board[y+2][x]);
+            if (y + 1 < board.length && !board[y + 1][x].isOccupied()) {
+                legalMoves.add(board[y + 1][x]);
+                if (!wasMoved && y + 2 < board.length && !board[y + 2][x].isOccupied()) {
+                    legalMoves.add(board[y + 2][x]);
                 }
             }
             if (x + 1 < board[0].length && y + 1 < board.length &&
-                    board[y+1][x+1].isOccupied() &&
-                    board[y+1][x+1].getOccupyingPiece().getColor() != c) {
-                legalMoves.add(board[y+1][x+1]);
+                    board[y + 1][x + 1].isOccupied() &&
+                    board[y + 1][x + 1].getOccupyingPiece().getColor() != c) {
+                legalMoves.add(board[y + 1][x + 1]);
             }
             if (x - 1 >= 0 && y + 1 < board.length &&
-                    board[y+1][x-1].isOccupied() &&
-                    board[y+1][x-1].getOccupyingPiece().getColor() != c) {
-                legalMoves.add(board[y+1][x-1]);
+                    board[y + 1][x - 1].isOccupied() &&
+                    board[y + 1][x - 1].getOccupyingPiece().getColor() != c) {
+                legalMoves.add(board[y + 1][x - 1]);
             }
         } else {
-            if (y - 1 >= 0 && !board[y-1][x].isOccupied()) {
-                legalMoves.add(board[y-1][x]);
-                if (!wasMoved && y - 2 >= 0 && !board[y-2][x].isOccupied()) {
-                    legalMoves.add(board[y-2][x]);
+            if (y - 1 >= 0 && !board[y - 1][x].isOccupied()) {
+                legalMoves.add(board[y - 1][x]);
+                if (!wasMoved && y - 2 >= 0 && !board[y - 2][x].isOccupied()) {
+                    legalMoves.add(board[y - 2][x]);
                 }
             }
             if (x + 1 < board[0].length && y - 1 >= 0 &&
-                    board[y-1][x+1].isOccupied() &&
-                    board[y-1][x+1].getOccupyingPiece().getColor() != c) {
-                legalMoves.add(board[y-1][x+1]);
+                    board[y - 1][x + 1].isOccupied() &&
+                    board[y - 1][x + 1].getOccupyingPiece().getColor() != c) {
+                legalMoves.add(board[y - 1][x + 1]);
             }
             if (x - 1 >= 0 && y - 1 >= 0 &&
-                    board[y-1][x-1].isOccupied() &&
-                    board[y-1][x-1].getOccupyingPiece().getColor() != c) {
-                legalMoves.add(board[y-1][x-1]);
+                    board[y - 1][x - 1].isOccupied() &&
+                    board[y - 1][x - 1].getOccupyingPiece().getColor() != c) {
+                legalMoves.add(board[y - 1][x - 1]);
             }
         }
+
         return legalMoves;
+    }
+
+    public void setWasMoved(boolean moved) {
+        this.wasMoved = moved;
+    }
+
+    public boolean hasMoved() {
+        return wasMoved;
     }
 }

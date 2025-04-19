@@ -1,7 +1,7 @@
-package main.java.chess.view;
+package chess.view;
 
-import main.java.chess.model.Square;
-import main.java.chess.model.pieces.Piece;
+import chess.model.Square;
+import chess.model.pieces.Piece;
 import javax.swing.*;
 import java.awt.*;
 

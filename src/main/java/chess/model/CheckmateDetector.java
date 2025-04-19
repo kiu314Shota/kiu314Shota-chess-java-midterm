@@ -1,7 +1,7 @@
-package main.java.chess.model;
+package chess.model;
 
-import main.java.chess.model.pieces.King;
-import main.java.chess.model.pieces.Piece;
+import chess.model.pieces.King;
+import chess.model.pieces.Piece;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -105,7 +105,7 @@ public class CheckmateDetector {
                                List<Piece> threats,
                                King king) {
         if (threats.size() != 1) return false;
-        Square t = threats.getFirst().getPosition();
+        Square t = threats.get(0).getPosition();
         if (king.getLegalMoves(boardState).contains(t) && testMove(king, t)) {
             return true;
         }
@@ -119,7 +119,7 @@ public class CheckmateDetector {
                              Map<Square, List<Piece>> blockMap,
                              King king) {
         if (threats.size() != 1) return false;
-        Square t = threats.getFirst().getPosition();
+        Square t = threats.get(0).getPosition();
         Square k = king.getPosition();
         Square[][] brd = boardState.getSquareArray();
 

@@ -1,4 +1,4 @@
-package main.java.chess.view;
+package chess.view;
 
 import javax.swing.*;
 import java.awt.*;

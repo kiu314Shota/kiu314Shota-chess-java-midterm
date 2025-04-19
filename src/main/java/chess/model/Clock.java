@@ -1,4 +1,4 @@
-package main.java.chess.model;
+package chess.model;
 
 public class Clock {
     private int hh, mm, ss;

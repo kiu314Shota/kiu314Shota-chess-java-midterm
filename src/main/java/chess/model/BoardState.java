@@ -1,6 +1,6 @@
-package main.java.chess.model;
+package chess.model;
 
-import main.java.chess.model.pieces.*;
+import chess.model.pieces.*;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -85,32 +85,44 @@ public class BoardState {
         whiteTurn = !whiteTurn;
     }
 
+    public List<Piece> getWhitePieces() {
+        return whitePieces;
+    }
+
+    public List<Piece> getBlackPieces() {
+        return blackPieces;
+    }
+
     public boolean isKingSafeAfterMove(Piece p, Square target) {
-        Square origin = p.getPosition();
+        Square original = p.getPosition();
         Piece captured = target.getOccupyingPiece();
+
+        original.removePiece();
+        target.setOccupyingPiece(p);
+        p.setPosition(target);
 
         LinkedList<Piece> whiteSim = new LinkedList<>(whitePieces);
         LinkedList<Piece> blackSim = new LinkedList<>(blackPieces);
 
-        (p.getColor() == 1 ? whiteSim : blackSim).remove(p);
-        if (captured != null) {
-            (captured.getColor() == 1 ? whiteSim : blackSim).remove(captured);
+        if (p.getColor() == 0) {
+            blackSim.remove(p);
+        } else {
+            whiteSim.remove(p);
         }
 
-        origin.removePiece();
-        target.setOccupyingPiece(p);
-
-        CheckmateDetector dt =
-                new CheckmateDetector(this, whiteSim, blackSim, whiteKing, blackKing);
-        boolean safe = (p.getColor() == 1) ? !dt.whiteInCheck() : !dt.blackInCheck();
-
-        target.removePiece();
-        origin.setOccupyingPiece(p);
         if (captured != null) {
-            target.setOccupyingPiece(captured);
+            if (captured.getColor() == 0) blackSim.remove(captured);
+            else whiteSim.remove(captured);
         }
 
-        return safe;
+        CheckmateDetector detector = new CheckmateDetector(this, whiteSim, blackSim, whiteKing, blackKing);
+        boolean isSafe = p.getColor() == 1 ? !detector.whiteInCheck() : !detector.blackInCheck();
+
+        target.setOccupyingPiece(captured);
+        original.setOccupyingPiece(p);
+        p.setPosition(original);
+
+        return isSafe;
     }
 
     public boolean isWhiteCheckmated() {
@@ -142,7 +154,21 @@ public class BoardState {
 
         from.removePiece();
         to.put(mover);
-
+        if (mover instanceof Pawn) {
+            ((Pawn) mover).setWasMoved(true);
+        }
         toggleTurn();
     }
+
+    public boolean hasAnyLegalMovesForCurrentPlayer() {
+        List<Piece> activePieces = whiteTurn ? whitePieces : blackPieces;
+        for (Piece p : activePieces) {
+            List<Square> legalMoves = p.getLegalMoves(this);
+            for (Square move : legalMoves) {
+                if (isKingSafeAfterMove(p, move)) return true;
+            }
+        }
+        return false;
+    }
+
 }

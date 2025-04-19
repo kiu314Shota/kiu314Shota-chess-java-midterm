@@ -61,9 +61,6 @@ public abstract class Piece {
         return img;
     }
 
-    /**
-     * Returns a list of legal moves for this piece using the current board state.
-     */
     public abstract List<Square> getLegalMoves(BoardState boardState);
 
     protected int[] getLinearOccupations(Square[][] board, int x, int y) {

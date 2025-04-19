@@ -1,9 +1,7 @@
 package main.java.chess.view;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 
 public class StartMenu implements Runnable {
     @Override
@@ -23,7 +21,6 @@ public class StartMenu implements Runnable {
         mainPanel.add(title);
         mainPanel.add(Box.createVerticalStrut(15));
 
-        // Player names section
         JPanel namesPanel = new JPanel(new GridLayout(2, 2, 10, 10));
         namesPanel.setMaximumSize(new Dimension(280, 60));
         namesPanel.add(new JLabel("Black:", SwingConstants.RIGHT));
@@ -35,16 +32,13 @@ public class StartMenu implements Runnable {
         mainPanel.add(namesPanel);
         mainPanel.add(Box.createVerticalStrut(15));
 
-        // Timer section with plus and minus buttons
         JPanel timerPanel = new JPanel();
         timerPanel.setLayout(new GridLayout(3, 3, 5, 5));
 
-        // Timer labels
         JLabel hourLabel = new JLabel("Hours:");
         JLabel minuteLabel = new JLabel("Minutes:");
         JLabel secondLabel = new JLabel("Seconds:");
 
-        // Default values: 0 hours, 2 minutes, 0 seconds.
         JTextField hourField = new JTextField("0", 3);
         JTextField minuteField = new JTextField("2", 3);
         JTextField secondField = new JTextField("0", 3);
@@ -56,7 +50,6 @@ public class StartMenu implements Runnable {
         JButton secondInc = new JButton("+");
         JButton secondDec = new JButton("-");
 
-        // Add action listeners for timer adjustments
         hourInc.addActionListener(e -> {
             int val = Integer.parseInt(hourField.getText());
             hourField.setText(String.valueOf(val + 1));
@@ -106,7 +99,6 @@ public class StartMenu implements Runnable {
         mainPanel.add(timerPanel);
         mainPanel.add(Box.createVerticalStrut(15));
 
-        // Control buttons: Start, Instructions, Quit.
         JPanel buttonPanel = new JPanel();
         JButton startButton = new JButton("Start");
         JButton instructButton = new JButton("Instructions");
@@ -116,7 +108,6 @@ public class StartMenu implements Runnable {
         buttonPanel.add(quitButton);
         mainPanel.add(buttonPanel);
 
-        // Action listeners
         startButton.addActionListener(e -> {
             String bn = blackNameField.getText();
             String wn = whiteNameField.getText();

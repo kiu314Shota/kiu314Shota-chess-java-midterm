@@ -2,13 +2,10 @@ package main.java.chess.model;
 
 import main.java.chess.model.pieces.Piece;
 
-/**
- * Represents a single square on the board (pure data).
- */
 public class Square {
     private final int xNum;
     private final int yNum;
-    private final int color; // 1 = light, 0 = dark
+    private final int color;
     private Piece occupyingPiece;
 
     public Square(int xNum, int yNum, int color) {
